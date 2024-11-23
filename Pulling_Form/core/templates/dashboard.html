@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Pulling Form{% endblock %}
+
+{% block content %}
+<div class="bg-white p-8 rounded shadow-md">
+    <h2 class="text-2xl font-bold mb-6">Welcome to your Dashboard</h2>
+    
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Your Unique Form URL</h3>
+        <p class="mb-2">Share this URL with others to allow them to submit data to your form:</p>
+        <div class="bg-gray-100 p-2 rounded">
+            <code>{{ form_url }}</code>
+        </div>
+    </div>
+
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Subscription Status</h3>
+        {% if has_active_subscription %}
+            <p class="text-green-600">Your subscription is active. Your form is currently accepting submissions.</p>
+            <p>Subscription expires on: {{ user.userprofile.subscription_expiry_date }}</p>
+        {% else %}
+            <p class="text-red-600">Your subscription is inactive. Your form is not accepting submissions.</p>
+            <a href="{% url 'initiate_subscription' %}" class="mt-2 inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                Subscribe Now
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="mb-6">
+        <h3 class="text-xl font-semibold mb-2">Form Entries</h3>
+        {% if submissions %}
+            <ul class="space-y-4">
+                {% for submission in submissions %}
+                    <li class="bg-gray-100 p-4 rounded">
+                        <p><strong>Name:</strong> {{ submission.name }}</p>
+                        <p><strong>Email:</strong> {{ submission.email }}</p>
+                        <p><strong>Message:</strong> {{ submission.message }}</p>
+                        <p><strong>Submitted:</strong> {{ submission.created_at }}</p>
+                        <div class="mt-2">
+                            <a href="{% url 'edit_form_submission' submission.id %}" class="text-blue-500 hover:underline mr-2">Edit</a>
+                            <a href="{% url 'delete_form_submission' submission.id %}" class="text-red-500 hover:underline">Delete</a>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>You don't have any form entries yet.</p>
+        {% endif %}
+    </div>
+
+    <div>
+        <h3 class="text-xl font-semibold mb-2">Account Management</h3>
+        <a href="{% url 'update_profile' %}" class="inline-block bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+            Update Profile
+        </a>
+    </div>
+</div>
+{% endblock %}
+
