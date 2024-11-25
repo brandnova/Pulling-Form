@@ -1,0 +1,34 @@
+Now, to automate the task of checking for expiring subscriptions, you can use the Django admin interface to create a cron job or use a task scheduler like Windows Task Scheduler or cron on Unix-based systems to run the management command periodically.
+
+For example, to run the command daily, you can set up a cron job (on Unix-based systems) like this:
+
+```plaintext
+0 0 * * * /path/to/your/python /path/to/your/manage.py check_expiring_subscriptions
+```
+
+This will run the command every day at midnight.
+
+
+CARD INFO>>>
+
+Bank Name:
+The issuing bank's name or logo, typically in a prominent position at the top.
+
+Card Type:
+Indicates the type of card (e.g., Debit, Credit, or Prepaid).
+
+Card Network Logo:
+The logo of the payment network (e.g., Visa, Mastercard, American Express).
+
+Card Number:
+A 16-digit number unique to the card, used for identification during transactions.
+
+Cardholder's Name:
+The name of the person authorized to use the card.
+
+Expiration Date:
+The month and year indicating when the card will expire.
+
+CVV/CVC Code:
+A 3-digit security code used for online or card-not-present transactions.
+

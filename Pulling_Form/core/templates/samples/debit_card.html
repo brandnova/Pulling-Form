@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debit Card Flip Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Custom CSS */
+    .card-bg {
+      background: linear-gradient(135deg, #1d1d1d, #4a4a4a);
+    }
+
+    .chip {
+      width: 50px;
+      height: 35px;
+      background: linear-gradient(90deg, #d4af37, #ffcc00);
+      border-radius: 5px;
+      position: relative;
+    }
+
+    .chip:before {
+      content: '';
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      right: 6px;
+      bottom: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+    }
+
+    /* Flip Animation */
+    .card-container {
+      perspective: 1000px;
+    }
+
+    .card {
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+    }
+
+    .card.flip {
+      transform: rotateY(180deg);
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+      backface-visibility: hidden;
+      width: 100%;
+      height: 100%;
+      border-radius: 1rem;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center h-screen bg-gray-200">
+  <div class="card-container w-[350px] h-[200px]" onclick="flipCard()">
+    <div class="card relative w-full h-full">
+      <!-- Front Side -->
+      <div class="card-front card-bg shadow-xl text-white p-6">
+        <!-- Bank Name -->
+        <div class="flex justify-between items-center">
+          <h1 class="text-lg font-bold">My Bank</h1>
+          <span class="text-sm uppercase tracking-wider">Debit Card</span>
+        </div>
+
+        <!-- Chip -->
+        <div class="mt-6">
+          <div class="chip"></div>
+        </div>
+
+        <!-- Card Number -->
+        <div class="mt-4 text-lg font-mono tracking-widest">
+          1234 5678 9012 3456
+        </div>
+
+        <!-- Card Holder and Expiry -->
+        <div class="flex justify-between items-center text-sm">
+          <div>
+            <p class="uppercase text-gray-400">Card Holder</p>
+            <p class="font-bold">John Doe</p>
+          </div>
+          <div>
+            <p class="uppercase text-gray-400">Expires</p>
+            <p class="font-bold">12/25</p>
+          </div>
+        </div>
+
+        <!-- Logo -->
+        <div class="absolute bottom-10 right-4">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2l4-4m2 8H7a2 2 0 01-2-2V7a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+      </div>
+
+      <!-- Back Side -->
+      <div class="card-back card-bg shadow-xl text-white p-6">
+        <!-- Magnetic Stripe -->
+        <div class="bg-black h-8 w-full rounded"></div>
+
+        <!-- Signature Strip and CVV -->
+        <div class="mt-2">
+          <p class="uppercase text-gray-400 text-xs">Authorized Signature</p>
+          <div class="bg-white h-6 w-2/3 rounded mt-1 relative">
+            <p class="absolute right-4 top-0.5 text-xs text-gray-700">John Doe</p>
+          </div>
+          <div class="mt-2 flex justify-between items-center">
+            <span class="text-gray-400 text-xs">CVV</span>
+            <span class="bg-gray-200 text-black px-2 py-1 rounded">123</span>
+          </div>
+        </div>
+
+        <!-- Additional Details -->
+        <div class="absolute bottom-4 text-xs text-gray-400">
+          <p>Customer Service: 1-800-MYBANK</p>
+          <p>www.mybank.com</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function flipCard() {
+      document.querySelector('.card').classList.toggle('flip');
+    }
+  </script>
+</body>
+</html>
