@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import UserProfile, FormSubmission, Subscription, SubscriptionSettings
+from .models import UserProfile, FormSubmission, Subscription, SubscriptionSettings, Notification
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
@@ -34,3 +34,4 @@ class SubscriptionSettingsAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
 
+admin.site.register(Notification)

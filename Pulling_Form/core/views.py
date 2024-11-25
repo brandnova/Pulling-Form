@@ -1,17 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate, logout
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, authenticate, logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
+from django.core.paginator import Paginator
 from django.core.mail import send_mail
+from django.core.cache import cache
 from django.db.models import Count
-from .forms import CustomUserCreationForm, PublicFormSubmissionForm, UserProfileUpdateForm
-from .models import UserProfile, FormSubmission, Subscription, SubscriptionSettings
-from .tasks import notify_superuser_new_registration
+from django.contrib.auth.views import PasswordResetView
+from django.urls import reverse_lazy, reverse
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomPasswordResetForm, CustomSetPasswordForm, CustomPasswordChangeForm, PublicFormSubmissionForm, UserProfileUpdateForm
+from .models import UserProfile, FormSubmission, Subscription, SubscriptionSettings, Notification
+from .tasks import notify_superuser_new_registration, notify_user_new_submission
 import uuid
 import requests
 from datetime import timedelta
@@ -32,11 +35,12 @@ def register(request):
             messages.success(request, "Registration successful.")
             
             # Notify superuser about new registration
-            notify_superuser_new_registration.delay(user.id)
+            notify_superuser_new_registration(user)
             
             return redirect('dashboard')
         messages.error(request, "Unsuccessful registration. Invalid information.")
-    form = CustomUserCreationForm()
+    else:
+        form = CustomUserCreationForm()
     return render(request, 'register.html', {'form': form})
 
 
@@ -45,7 +49,7 @@ def user_login(request):
         return redirect('dashboard')
     
     if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
+        form = CustomAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
@@ -55,10 +59,11 @@ def user_login(request):
                 messages.info(request, f"You are now logged in as {username}.")
                 return redirect('dashboard')
             else:
-                messages.error(request,"Invalid username or password.")
+                messages.error(request, "Invalid username or password.")
         else:
-            messages.error(request,"Invalid username or password.")
-    form = AuthenticationForm()
+            messages.error(request, "Invalid username or password.")
+    else:
+        form = CustomAuthenticationForm()
     return render(request, 'login.html', {'form': form})
 
 @login_required
@@ -67,23 +72,6 @@ def user_logout(request):
     messages.info(request, "You have successfully logged out.")
     return redirect('home')
 
-@login_required
-def dashboard(request):
-    user_profile = request.user.userprofile
-    form_url = request.build_absolute_uri(f'/form/{user_profile.unique_form_id}/')
-    
-    # Get form submission analytics
-    total_submissions = user_profile.form_submissions.count()
-    submissions_by_date = user_profile.form_submissions.values('created_at__date').annotate(count=Count('id')).order_by('-created_at__date')[:7]
-    
-    context = {
-        'form_url': form_url,
-        'has_active_subscription': user_profile.has_active_subscription(),
-        'submissions': user_profile.form_submissions.all().order_by('-created_at'),
-        'total_submissions': total_submissions,
-        'submissions_by_date': submissions_by_date,
-    }
-    return render(request, 'dashboard.html', context)
 
 def public_form(request, form_id):
     user_profile = get_object_or_404(UserProfile, unique_form_id=form_id)
@@ -97,27 +85,70 @@ def public_form(request, form_id):
             submission = form.save(commit=False)
             submission.user_profile = user_profile
             submission.save()
+            
+            # Create notification for new submission
+            notify_user_new_submission(user_profile.user, submission)
+            
             messages.success(request, "Form submitted successfully!")
-            return redirect('form_success')
+            # Redirect to success page with the form URL
+            form_url = reverse('public_form', kwargs={'form_id': user_profile.unique_form_id})
+            return redirect(f"{reverse('form_success')}?form_url={form_url}")
     else:
         form = PublicFormSubmissionForm()
     
     return render(request, 'public_form.html', {'form': form})
 
+
+
 def form_success(request):
-    return render(request, 'form_success.html')
+    # Get the form URL from the query string
+    form_url = request.GET.get('form_url')
+    
+    if not form_url:
+        return HttpResponseBadRequest("Missing form URL")
+    
+    return render(request, 'form_success.html', {'form_url': form_url})
+
 
 
 @login_required
 def dashboard(request):
     user_profile = request.user.userprofile
     form_url = request.build_absolute_uri(f'/form/{user_profile.unique_form_id}/')
+    
+    # Get form submissions
+    submissions = user_profile.form_submissions.all().order_by('-created_at')
+    
+    # Setup pagination
+    paginator = Paginator(submissions, 5)  
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get form submission analytics
+    total_submissions = submissions.count()
+    submissions_by_date = user_profile.form_submissions.values('created_at__date').annotate(count=Count('id')).order_by('-created_at__date')[:7]
+    
+    # Get unread notifications
+    unread_notifications = request.user.notifications.filter(is_read=False)
+    
     context = {
         'form_url': form_url,
         'has_active_subscription': user_profile.has_active_subscription(),
-        'submissions': user_profile.form_submissions.all().order_by('-created_at')
+        'page_obj': page_obj,
+        'total_submissions': total_submissions,
+        'submissions_by_date': submissions_by_date,
+        'unread_notifications': unread_notifications,
     }
     return render(request, 'dashboard.html', context)
+
+@login_required
+def mark_notification_as_read(request, notification_id):
+    notification = get_object_or_404(Notification, id=notification_id, user=request.user)
+    notification.is_read = True
+    notification.save()
+    return redirect('dashboard')
+
+
 
 @login_required
 def initiate_subscription(request):
@@ -249,4 +280,40 @@ def update_profile(request):
     else:
         form = UserProfileUpdateForm(instance=request.user)
     return render(request, 'update_profile.html', {'form': form})
+
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'password_reset_form.html'
+    email_template_name = 'password_reset_email.html'
+    success_url = reverse_lazy('password_reset_done')
+    form_class = CustomPasswordResetForm
+
+    def form_valid(self, form):
+        email = form.cleaned_data['email']
+        cache_key = f'password_reset_{email}'
+        last_reset = cache.get(cache_key)
+
+        if last_reset and (timezone.now() - last_reset).total_seconds() < 300:  # 5 minutes cooldown
+            messages.error(self.request, "Please wait 5 minutes before requesting another password reset.")
+            return self.form_invalid(form)
+
+        cache.set(cache_key, timezone.now(), 300)  # Set cooldown
+        return super().form_valid(form)
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = CustomPasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('dashboard')
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = CustomPasswordChangeForm(request.user)
+    return render(request, 'change_password.html', {
+        'form': form
+    })
 

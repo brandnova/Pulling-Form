@@ -1,11 +1,25 @@
-from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
-from .models import UserProfile
+from .models import UserProfile, Notification
 
-@shared_task
-def send_subscription_expiry_reminders():
+def notify_superuser_new_registration(user):
+    send_mail(
+        'New User Registration',
+        f'A new user has registered: {user.username} (Email: {user.email})',
+        settings.DEFAULT_FROM_EMAIL,
+        [settings.SUPERUSER_EMAIL],
+        fail_silently=False,
+    )
+
+def notify_user_new_submission(user, submission):
+    # Create dashboard notification
+    Notification.objects.create(
+        user=user,
+        message=f'New form submission received from {submission.name}.'
+    )
+
+def check_subscription_expiry():
     # Get all active subscriptions expiring in 5 days
     expiry_date = timezone.now().date() + timezone.timedelta(days=5)
     expiring_profiles = UserProfile.objects.filter(
@@ -14,23 +28,8 @@ def send_subscription_expiry_reminders():
     )
 
     for profile in expiring_profiles:
-        send_mail(
-            'Subscription Expiry Reminder',
-            f'Your subscription will expire on {profile.subscription_expiry_date}. Please renew to continue using our services.',
-            settings.DEFAULT_FROM_EMAIL,
-            [profile.user.email],
-            fail_silently=False,
+        Notification.objects.create(
+            user=profile.user,
+            message=f'Your subscription will expire on {profile.subscription_expiry_date}. Please renew to continue using our services.'
         )
-
-@shared_task
-def notify_superuser_new_registration(user_id):
-    from django.contrib.auth.models import User
-    user = User.objects.get(id=user_id)
-    send_mail(
-        'New User Registration',
-        f'A new user has registered: {user.username} (Email: {user.email})',
-        settings.DEFAULT_FROM_EMAIL,
-        [settings.SUPERUSER_EMAIL],
-        fail_silently=False,
-    )
 
