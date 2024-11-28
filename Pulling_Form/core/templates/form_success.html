@@ -1,13 +1,21 @@
 {% extends 'url_base.html' %}
 
-{% block title %}Form Submitted Successfully{% endblock %}
+{% block title %}Form Submitted Successfully - Pulling Form{% endblock %}
 
 {% block content %}
 <div class="max-w-md mx-auto bg-white p-8 rounded shadow-md text-center">
-    <h2 class="text-2xl font-bold mb-6">Thank You!</h2>
-    <p class="mb-4">Your form has been submitted successfully.</p>
-    <a href="{{ form_url }}" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-        Return to Form
-    </a>
+    <div class="mb-6">
+        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-3xl text-green-500"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-800">Thank You!</h2>
+        <p class="text-gray-600 mt-2">Your form has been submitted successfully.</p>
+    </div>
+    <div class="space-y-4">
+        <a href="{{ return_url }}" class="inline-block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-200">
+            Submit Another Response
+        </a>
+        <p class="text-sm text-gray-500">Click the button above to return to the form page.</p>
+    </div>
 </div>
 {% endblock %}

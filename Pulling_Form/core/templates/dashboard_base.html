@@ -110,6 +110,14 @@
                                 <span class="ml-3 sidebar-text">Dashboard</span>
                             </a>
                         </li>
+                        <li>
+                            <a href="{% url 'edit_custom_page' %}" class="flex items-center py-2 px-4 rounded-lg {% if request.path == '/edit-custom-page/' %}bg-blue-700{% endif %} hover:bg-blue-700 transition-colors focus-visible" 
+                            role="menuitem"
+                            {% if request.path == '/edit-custom-page/' %}aria-current="page"{% endif %}>
+                                <i class="fas fa-edit w-5"></i>
+                                <span class="ml-3">Edit Custom Page</span>
+                            </a>
+                        </li>
                         <li role="none">
                             <a href="{% url 'update_profile' %}" 
                                class="sidebar-item flex items-center py-2 px-4 rounded-lg {% if request.path == '/profile/update/' %}bg-blue-700{% endif %} hover:bg-blue-700 transition-colors focus-visible" 

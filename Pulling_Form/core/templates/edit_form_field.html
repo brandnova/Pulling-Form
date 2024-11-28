@@ -1,0 +1,152 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Edit Form Field - Pulling Form{% endblock %}
+
+{% block header %}Edit Form Field{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <h2 class="text-2xl font-bold mb-6">Edit Form Field: {{ field.name }}</h2>
+    <form method="post" class="space-y-4" id="edit-form-field">
+        {% csrf_token %}
+        <div>
+            <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                Field Name
+            </label>
+            <div class="mt-1">
+                {{ form.name }}
+            </div>
+            {% if form.name.errors %}
+                <span class="text-red-500 text-xs">{{ form.name.errors|join:", " }}</span>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.field_type.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                Field Type
+            </label>
+            <div class="mt-1">
+                {{ form.field_type }}
+            </div>
+            {% if form.field_type.errors %}
+                <span class="text-red-500 text-xs">{{ form.field_type.errors|join:", " }}</span>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.required.id_for_label }}" class="inline-flex items-center">
+                {{ form.required }}
+                <span class="ml-2">Required</span>
+            </label>
+        </div>
+        
+        <div id="options-container" style="display: none;">
+            <label for="{{ form.options.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                Options (comma-separated)
+            </label>
+            <div class="mt-1">
+                {{ form.options }}
+            </div>
+            {% if form.options.errors %}
+                <span class="text-red-500 text-xs">{{ form.options.errors|join:", " }}</span>
+            {% endif %}
+        </div>
+        
+        <div>
+            <label for="{{ form.placeholder.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                Placeholder
+            </label>
+            <div class="mt-1">
+                {{ form.placeholder }}
+            </div>
+            {% if form.placeholder.errors %}
+                <span class="text-red-500 text-xs">{{ form.placeholder.errors|join:", " }}</span>
+            {% endif %}
+        </div>
+        
+        <div id="range-container" style="display: none;">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="{{ form.min_value.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Min Value
+                    </label>
+                    <div class="mt-1">
+                        {{ form.min_value }}
+                    </div>
+                    {% if form.min_value.errors %}
+                        <span class="text-red-500 text-xs">{{ form.min_value.errors|join:", " }}</span>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.max_value.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Max Value
+                    </label>
+                    <div class="mt-1">
+                        {{ form.max_value }}
+                    </div>
+                    {% if form.max_value.errors %}
+                        <span class="text-red-500 text-xs">{{ form.max_value.errors|join:", " }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div id="length-container" style="display: none;">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label for="{{ form.min_length.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                        Min Length
+                    </label>
+                    <div class="mt-1">
+                        {{ form.min_length }}
+                    </div>
+                    {% if form.min_length.errors %}
+                        <span class="text-red-500 text-xs">{{ form.min_length.errors|join:", " }}</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <label for="{{ form.description.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                Description
+            </label>
+            <div class="mt-1">
+                {{ form.description }}
+            </div>
+            {% if form.description.errors %}
+                <span class="text-red-500 text-xs">{{ form.description.errors|join:", " }}</span>
+            {% endif %}
+        </div>
+
+        <div class="flex justify-end space-x-4">
+            <a href="{% url 'edit_custom_page' %}" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                Cancel
+            </a>
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fieldTypeSelect = document.getElementById('{{ form.field_type.id_for_label }}');
+    const optionsContainer = document.getElementById('options-container');
+    const rangeContainer = document.getElementById('range-container');
+    const lengthContainer = document.getElementById('length-container');
+
+    function updateFieldOptions() {
+        const selectedType = fieldTypeSelect.value;
+        optionsContainer.style.display = ['dropdown', 'radio', 'checkbox'].includes(selectedType) ? 'block' : 'none';
+        rangeContainer.style.display = ['range', 'number'].includes(selectedType) ? 'block' : 'none';
+        lengthContainer.style.display = ['text', 'textarea', 'password'].includes(selectedType) ? 'block' : 'none';
+    }
+
+    fieldTypeSelect.addEventListener('change', updateFieldOptions);
+    updateFieldOptions();
+});
+</script>
+{% endblock %}
+
