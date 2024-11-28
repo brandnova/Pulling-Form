@@ -12,8 +12,8 @@ from django.core.cache import cache
 from django.db.models import Count
 from django.contrib.auth.views import PasswordResetView
 from django.urls import reverse_lazy, reverse
-from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomPasswordResetForm, CustomSetPasswordForm, CustomPasswordChangeForm, PublicFormSubmissionForm, UserProfileUpdateForm
-from .models import UserProfile, FormSubmission, Subscription, SubscriptionSettings, Notification
+from .forms import *
+from .models import CustomFormField, UserProfile, FormSubmission, Subscription, SubscriptionSettings, Notification
 from .tasks import notify_superuser_new_registration, notify_user_new_submission
 import uuid
 import requests
@@ -75,71 +75,70 @@ def user_logout(request):
 
 def public_form(request, form_id):
     user_profile = get_object_or_404(UserProfile, unique_form_id=form_id)
+    custom_page = user_profile.user.custom_page
     
     if not user_profile.has_active_subscription():
         return render(request, 'form_inactive.html')
     
+    custom_fields = custom_page.form_fields.all()
+    
     if request.method == 'POST':
-        form = PublicFormSubmissionForm(request.POST)
+        form = DynamicFormSubmissionForm(request.POST, custom_fields=custom_fields)
         if form.is_valid():
-            submission = form.save(commit=False)
-            submission.user_profile = user_profile
-            submission.save()
+            submission = FormSubmission.objects.create(
+                user_profile=user_profile,
+                data=form.cleaned_data
+            )
             
             # Create notification for new submission
             notify_user_new_submission(user_profile.user, submission)
             
+            # Store the return URL in the session
+            request.session['return_url'] = request.build_absolute_uri()
+            
             messages.success(request, "Form submitted successfully!")
-            # Redirect to success page with the form URL
-            form_url = reverse('public_form', kwargs={'form_id': user_profile.unique_form_id})
-            return redirect(f"{reverse('form_success')}?form_url={form_url}")
+            return redirect('form_success')
     else:
-        form = PublicFormSubmissionForm()
+        form = DynamicFormSubmissionForm(custom_fields=custom_fields)
     
-    return render(request, 'public_form.html', {'form': form})
-
+    context = {
+        'custom_page': custom_page,
+        'form': form,
+    }
+    return render(request, 'public_form.html', context)
 
 
 def form_success(request):
-    # Get the form URL from the query string
-    form_url = request.GET.get('form_url')
-    
-    if not form_url:
-        return HttpResponseBadRequest("Missing form URL")
-    
-    return render(request, 'form_success.html', {'form_url': form_url})
-
+    # Get the return URL from session, or use home page as fallback
+    return_url = request.session.get('return_url', '/')
+    return render(request, 'form_success.html', {'return_url': return_url})
 
 
 @login_required
 def dashboard(request):
-    user_profile = request.user.userprofile
-    form_url = request.build_absolute_uri(f'/form/{user_profile.unique_form_id}/')
+    # Get all form submissions for the user
+    submissions = FormSubmission.objects.filter(
+        user_profile=request.user.userprofile
+    ).order_by('-created_at')
     
-    # Get form submissions
-    submissions = user_profile.form_submissions.all().order_by('-created_at')
-    
-    # Setup pagination
-    paginator = Paginator(submissions, 5)  
+    # Set up pagination
+    paginator = Paginator(submissions, 10)  # Show 10 submissions per page
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    # Get form submission analytics
-    total_submissions = submissions.count()
-    submissions_by_date = user_profile.form_submissions.values('created_at__date').annotate(count=Count('id')).order_by('-created_at__date')[:7]
-    
-    # Get unread notifications
-    unread_notifications = request.user.notifications.filter(is_read=False)
+    # Get the form URL for sharing
+    form_url = request.build_absolute_uri(
+        reverse('public_form', args=[request.user.userprofile.unique_form_id])
+    )
     
     context = {
-        'form_url': form_url,
-        'has_active_subscription': user_profile.has_active_subscription(),
         'page_obj': page_obj,
-        'total_submissions': total_submissions,
-        'submissions_by_date': submissions_by_date,
-        'unread_notifications': unread_notifications,
+        'total_submissions': submissions.count(),
+        'form_url': form_url,
+        'has_active_subscription': request.user.userprofile.has_active_subscription(),
     }
     return render(request, 'dashboard.html', context)
+
 
 @login_required
 def mark_notification_as_read(request, notification_id):
@@ -249,25 +248,53 @@ def paystack_webhook(request):
 
 @login_required
 def edit_form_submission(request, submission_id):
-    submission = get_object_or_404(FormSubmission, id=submission_id, user_profile=request.user.userprofile)
+    submission = get_object_or_404(
+        FormSubmission, 
+        id=submission_id, 
+        user_profile=request.user.userprofile
+    )
+    custom_fields = request.user.custom_page.form_fields.all()
+
     if request.method == 'POST':
-        form = PublicFormSubmissionForm(request.POST, instance=submission)
+        form = FormSubmissionEditForm(
+            request.POST,
+            instance=submission,
+            custom_fields=custom_fields
+        )
         if form.is_valid():
             form.save()
-            messages.success(request, "Form submission updated successfully.")
+            messages.success(request, "Form submission updated successfully!")
             return redirect('dashboard')
     else:
-        form = PublicFormSubmissionForm(instance=submission)
-    return render(request, 'edit_form_submission.html', {'form': form})
+        form = FormSubmissionEditForm(
+            instance=submission,
+            custom_fields=custom_fields
+        )
+
+    context = {
+        'form': form,
+        'submission': submission,
+        'custom_fields': custom_fields,
+    }
+    return render(request, 'edit_form_submission.html', context)
+
+
 
 @login_required
 def delete_form_submission(request, submission_id):
-    submission = get_object_or_404(FormSubmission, id=submission_id, user_profile=request.user.userprofile)
+    submission = get_object_or_404(
+        FormSubmission, 
+        id=submission_id, 
+        user_profile=request.user.userprofile
+    )
+    
     if request.method == 'POST':
         submission.delete()
-        messages.success(request, "Form submission deleted successfully.")
+        messages.success(request, "Form submission deleted successfully!")
         return redirect('dashboard')
+        
     return render(request, 'delete_form_submission.html', {'submission': submission})
+
 
 @login_required
 def update_profile(request):
@@ -317,3 +344,74 @@ def change_password(request):
         'form': form
     })
 
+@login_required
+def edit_custom_page(request):
+    custom_page = request.user.custom_page
+    if request.method == 'POST':
+        form = CustomPageForm(request.POST, instance=custom_page)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Your page information has been updated.")
+            return redirect('edit_custom_page')
+    else:
+        form = CustomPageForm(instance=custom_page)
+    
+    form_fields = custom_page.form_fields.all()
+    return render(request, 'edit_custom_page.html', {'form': form, 'form_fields': form_fields})
+
+@login_required
+def add_form_field(request):
+    if request.method == 'POST':
+        form = CustomFormFieldForm(request.POST)
+        if form.is_valid():
+            form_field = form.save(commit=False)
+            form_field.custom_page = request.user.custom_page
+            form_field.order = request.user.custom_page.form_fields.count() + 1
+            form_field.save()
+            messages.success(request, "New form field added successfully.")
+            return redirect('edit_custom_page')
+    else:
+        form = CustomFormFieldForm()
+    
+    return render(request, 'add_form_field.html', {'form': form})
+
+@login_required
+def edit_form_field(request, field_id):
+    field = get_object_or_404(CustomFormField, id=field_id, custom_page=request.user.custom_page)
+    
+    if request.method == 'POST':
+        form = CustomFormFieldForm(request.POST, instance=field)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Form field updated successfully!')
+            return redirect('edit_custom_page')
+    else:
+        form = CustomFormFieldForm(instance=field)
+    
+    context = {
+        'form': form,
+        'field': field,
+        'field_type': field.field_type,  # Add this to ensure proper field type display
+    }
+    
+    return render(request, 'edit_form_field.html', context)
+
+
+@login_required
+def delete_form_field(request, field_id):
+    form_field = get_object_or_404(CustomFormField, id=field_id, custom_page=request.user.custom_page)
+    if request.method == 'POST':
+        form_field.delete()
+        messages.success(request, "Form field deleted successfully.")
+        return redirect('edit_custom_page')
+    
+    return render(request, 'delete_form_field.html', {'field': form_field})
+
+@login_required
+def reorder_form_fields(request):
+    if request.method == 'POST':
+        field_order = request.POST.getlist('field_order[]')
+        for index, field_id in enumerate(field_order, start=1):
+            CustomFormField.objects.filter(id=field_id, custom_page=request.user.custom_page).update(order=index)
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'error'}, status=400)

@@ -16,7 +16,8 @@ def notify_user_new_submission(user, submission):
     # Create dashboard notification
     Notification.objects.create(
         user=user,
-        message=f'New form submission received from {submission.name}.'
+        message=f'New form submission received (ID: {submission.id}) at {submission.created_at.strftime("%Y-%m-%d %H:%M")}',
+        is_read=False
     )
 
 def check_subscription_expiry():
@@ -30,6 +31,7 @@ def check_subscription_expiry():
     for profile in expiring_profiles:
         Notification.objects.create(
             user=profile.user,
-            message=f'Your subscription will expire on {profile.subscription_expiry_date}. Please renew to continue using our services.'
+            message=f'Your subscription will expire on {profile.subscription_expiry_date}. Please renew to continue using our services.',
+            is_read=False
         )
 

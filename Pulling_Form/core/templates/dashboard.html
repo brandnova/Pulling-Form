@@ -78,13 +78,12 @@
         </div>
     </div>
     
-    {% if page_obj  %}
+    {% if page_obj %}
         <div class="overflow-x-auto">
             <table class="min-w-full">
                 <thead class="bg-gray-50">
                     <tr>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission ID</th>
                         <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -92,8 +91,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                     {% for submission in page_obj %}
                     <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-3 whitespace-nowrap">{{ submission.name }}</td>
-                        <td class="px-4 py-3 whitespace-nowrap">{{ submission.email }}</td>
+                        <td class="px-4 py-3 whitespace-nowrap">{{ submission.id }}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-sm">{{ submission.created_at|date:"M d, Y H:i" }}</td>
                         <td class="px-4 py-3 whitespace-nowrap text-right text-sm space-x-2">
                             <button onclick="toggleSubmissionDetails('{{ submission.id }}')" class="text-blue-600 hover:text-blue-700">
@@ -119,36 +117,29 @@
                                     </button>
                                 </div>
                                 <div class="grid grid-cols-1 gap-4">
-                                    {% for field, value in submission.get_display_fields %}
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <div class="flex justify-between items-center">
-                                            <h4 class="text-sm font-medium text-gray-500">{{ field|title }}</h4>
-                                            <button onclick="copyToClipboard('{{ value }}', this)" 
-                                                    class="text-blue-600 hover:text-blue-700 transition-colors">
-                                                <i class="fas fa-copy"></i>
-                                            </button>
+                                    {% for field_name, field_value in submission.get_display_fields %}
+                                        <div class="bg-gray-50 p-4 rounded-lg">
+                                            <div class="flex justify-between items-center">
+                                                <h4 class="text-sm font-medium text-gray-500">{{ field_name|title }}</h4>
+                                                <button onclick="copyToClipboard('{{ field_value }}', this)" 
+                                                        class="text-blue-600 hover:text-blue-700 transition-colors">
+                                                    <i class="fas fa-copy"></i>
+                                                </button>
+                                            </div>
+                                            <p class="mt-1 text-gray-900">
+                                                {% if field_value|length > 100 %}
+                                                    {{ field_value|slice:":100" }}...
+                                                {% else %}
+                                                    {{ field_value }}
+                                                {% endif %}
+                                            </p>
                                         </div>
-                                        {% if field == 'card_number' %}
-                                            <p class="mt-1 text-gray-900" id="formattedCard{{ submission.id }}">{{ value }}</p>
-                                        {% else %}
-                                            <p class="mt-1 text-gray-900">{{ value }}</p>
-                                        {% endif %}
-                                    </div>
                                     {% endfor %}
-                                    <div class="bg-gray-50 p-4 rounded-lg">
-                                        <div class="flex justify-between items-center">
-                                            <h4 class="text-sm font-medium text-gray-500">Submitted At</h4>
-                                            <button onclick="copyToClipboard('{{ submission.created_at|date:"F j, Y H:i" }}', this)" 
-                                                    class="text-blue-600 hover:text-blue-700 transition-colors">
-                                                <i class="fas fa-copy"></i>
-                                            </button>
-                                        </div>
-                                        <p class="mt-1">{{ submission.created_at|date:"F j, Y H:i" }}</p>
-                                    </div>
                                 </div>
+                                
                                 <div class="mt-6 flex justify-end space-x-3">
                                     <a href="{% url 'edit_form_submission' submission.id %}" 
-                                       class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
                                         Edit Submission
                                     </a>
                                     <button onclick="toggleSubmissionDetails('{{ submission.id }}')"
@@ -159,6 +150,7 @@
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Delete Confirmation Modal -->
                     <div id="deleteModal{{ submission.id }}" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
@@ -227,23 +219,10 @@
 </div>
 
 <script>
-    function formatCardNumber(cardNumber) {
-        // Remove any existing spaces
-        const cleaned = cardNumber.replace(/\s/g, '');
-        // Add a space after every 4 digits
-        return cleaned.replace(/(\d{4})(?=\d)/g, '$1 ');
-    }
-
     function toggleSubmissionDetails(submissionId) {
         const modal = document.getElementById(`submissionModal${submissionId}`);
         modal.classList.toggle('hidden');
         document.body.classList.toggle('overflow-hidden');
-        
-        // Format card number when modal is opened
-        const cardElement = document.getElementById(`formattedCard${submissionId}`);
-        if (cardElement && !modal.classList.contains('hidden')) {
-            cardElement.textContent = formatCardNumber(cardElement.textContent);
-        }
     }
 
     function confirmDelete(submissionId) {
@@ -254,12 +233,7 @@
 
     async function copyToClipboard(text, button) {
         try {
-            // If copying card number, format it first
-            const formattedText = button.closest('.bg-gray-50').querySelector('h4').textContent.toLowerCase().includes('card number') 
-                ? formatCardNumber(text) 
-                : text;
-                
-            await navigator.clipboard.writeText(formattedText);
+            await navigator.clipboard.writeText(text);
             
             // Change icon temporarily to show success
             const icon = button.querySelector('i');
@@ -292,3 +266,6 @@
     });
 </script>
 {% endblock %}
+
+
+

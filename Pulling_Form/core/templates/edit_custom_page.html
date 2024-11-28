@@ -1,0 +1,76 @@
+{% extends 'dashboard_base.html' %}
+
+{% block title %}Edit Custom Page - Pulling Form{% endblock %}
+
+{% block header %}Edit Your Custom Page{% endblock %}
+
+{% block content %}
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <h2 class="text-2xl font-bold mb-6">Edit Page Information</h2>
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+            <div>
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ field.label }}
+                </label>
+                <div class="mt-1">
+                    {{ field }}
+                </div>
+                {% if field.errors %}
+                    <span class="text-red-500 text-xs">{{ field.errors|join:", " }}</span>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+            Save Changes
+        </button>
+    </form>
+
+    <h2 class="text-2xl font-bold mt-8 mb-4">Custom Form Fields</h2>
+    <div id="form-fields-list" class="space-y-4">
+        {% for field in form_fields %}
+            <div class="flex items-center justify-between bg-gray-100 p-4 rounded" data-id="{{ field.id }}">
+                <span>{{ field.name }} ({{ field.get_field_type_display }})</span>
+                <div>
+                    <a href="{% url 'edit_form_field' field.id %}" class="text-blue-500 hover:underline mr-2">Edit</a>
+                    <a href="{% url 'delete_form_field' field.id %}" class="text-red-500 hover:underline">Delete</a>
+                </div>
+            </div>
+        {% empty %}
+            <p>No custom form fields yet.</p>
+        {% endfor %}
+    </div>
+    <a href="{% url 'add_form_field' %}" class="inline-block mt-4 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+        Add New Form Field
+    </a>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var el = document.getElementById('form-fields-list');
+        var sortable = Sortable.create(el, {
+            animation: 150,
+            onEnd: function() {
+                var newOrder = sortable.toArray();
+                fetch('{% url "reorder_form_fields" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: 'field_order=' + JSON.stringify(newOrder)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log('Form fields reordered successfully');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}
+

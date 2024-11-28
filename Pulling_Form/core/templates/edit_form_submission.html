@@ -2,50 +2,107 @@
 
 {% block title %}Edit Form Submission - Pulling Form{% endblock %}
 
+{% block header %}Edit Form Submission{% endblock %}
+
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="bg-white rounded-lg shadow-sm p-6">
-        <h2 class="text-2xl font-bold mb-6">Edit Form Submission</h2>
-        <form method="post" class="space-y-6">
-            {% csrf_token %}
-            {% for field in form %}
-                <div>
-                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ field.label }}
-                    </label>
-                    <div class="mt-1">
-                        {% if field.field.widget.input_type == "textarea" %}
-                            <textarea name="{{ field.name }}" 
-                                      id="{{ field.id_for_label }}"
-                                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                      rows="4">{{ field.value|default:'' }}</textarea>
-                        {% else %}
-                            <input type="{{ field.field.widget.input_type }}"
-                                   name="{{ field.name }}"
-                                   id="{{ field.id_for_label }}"
-                                   value="{{ field.value|default:'' }}"
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        {% endif %}
-                    </div>
-                    {% if field.errors %}
-                        <p class="mt-1 text-sm text-red-600">{{ field.errors|join:", " }}</p>
-                    {% endif %}
-                    {% if field.help_text %}
-                        <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
+<div class="max-w-2xl mx-auto bg-white p-8 rounded shadow-md">
+    <div class="mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Edit Form Submission</h2>
+        <p class="text-gray-600 mt-2">Update the submission details below.</p>
+    </div>
+    
+    <form method="post" class="space-y-6">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="space-y-2">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+                    {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+                </label>
+                {% if field.help_text %}
+                    <p class="text-sm text-gray-500">{{ field.help_text }}</p>
+                {% endif %}
+                
+                <div class="mt-1">
+                    {% if field.field.widget.input_type == 'range' %}
+                        <div class="space-y-2">
+                            <div class="flex items-center space-x-4">
+                                <input type="range" 
+                                       name="{{ field.name }}" 
+                                       id="{{ field.id_for_label }}"
+                                       min="{{ field.field.min_value }}"
+                                       max="{{ field.field.max_value }}"
+                                       value="{{ field.value|default:field.field.min_value }}"
+                                       class="w-full"
+                                       oninput="document.getElementById('range_value_{{ field.name }}').value = this.value">
+                                <output id="range_value_{{ field.name }}" 
+                                        class="px-2 py-1 bg-gray-100 rounded">{{ field.value|default:field.field.min_value }}</output>
+                            </div>
+                            <div class="flex justify-between text-sm text-gray-500">
+                                <span>{{ field.field.min_value }}</span>
+                                <span>{{ field.field.max_value }}</span>
+                            </div>
+                        </div>
+                    {% elif field.field.widget.input_type == 'checkbox' %}
+                        <div class="space-y-2">
+                            {% for checkbox in field %}
+                                <div class="flex items-center">
+                                    {{ checkbox.tag }}
+                                    <label for="{{ checkbox.id_for_label }}" class="ml-2 text-sm text-gray-700">
+                                        {{ checkbox.choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif field.field.widget.input_type == 'radio' %}
+                        <div class="space-y-2">
+                            {% for radio in field %}
+                                <div class="flex items-center">
+                                    {{ radio.tag }}
+                                    <label for="{{ radio.id_for_label }}" class="ml-2 text-sm text-gray-700">
+                                        {{ radio.choice_label }}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% elif field.field.widget.input_type == 'select' %}
+                        {{ field }}
+                    {% elif field.field.widget.input_type == 'textarea' %}
+                        {{ field }}
+                    {% else %}
+                        {{ field }}
                     {% endif %}
                 </div>
-            {% endfor %}
-            <div class="flex justify-end space-x-3">
-                <a href="{% url 'dashboard' %}" 
-                   class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                    Cancel
-                </a>
-                <button type="submit" 
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                    Save Changes
-                </button>
+                
+                {% if field.errors %}
+                    <span class="text-red-500 text-xs">{{ field.errors|join:", " }}</span>
+                {% endif %}
             </div>
-        </form>
-    </div>
+        {% endfor %}
+        
+        <div class="flex justify-end space-x-4 pt-4">
+            <a href="{% url 'dashboard' %}" 
+               class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors">
+                Cancel
+            </a>
+            <button type="submit" 
+                    class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+                Update Submission
+            </button>
+        </div>
+    </form>
 </div>
+
+<script>
+    // Initialize range field values on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const rangeInputs = document.querySelectorAll('input[type="range"]');
+        rangeInputs.forEach(input => {
+            const output = document.getElementById(`range_value_${input.name}`);
+            if (output) {
+                output.value = input.value;
+            }
+        });
+    });
+</script>
 {% endblock %}
+
