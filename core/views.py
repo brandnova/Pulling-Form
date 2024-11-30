@@ -5,7 +5,8 @@ from django.contrib import messages
 from django.utils import timezone
 from django.conf import settings
 from django.http import JsonResponse, HttpResponseBadRequest, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, csrf_protect
+from django.utils.safestring import mark_safe
 from django.core.paginator import Paginator
 from django.core.mail import send_mail
 from django.core.cache import cache
@@ -13,7 +14,7 @@ from django.db.models import Count
 from django.contrib.auth.views import PasswordResetView
 from django.template import Template, Context
 from django.urls import reverse_lazy, reverse
-from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomPasswordResetForm, CustomSetPasswordForm, CustomPasswordChangeForm, PublicFormSubmissionForm, TemplateSelectionForm, UserProfileUpdateForm
+from .forms import CustomUserCreationForm, CustomAuthenticationForm, CustomPasswordResetForm, CustomSetPasswordForm, CustomPasswordChangeForm, PriceAndCurrencyForm, PublicFormSubmissionForm, TemplateSelectionForm, UserProfileUpdateForm
 from .models import CustomFormTemplate, UserProfile, FormSubmission, Subscription, SubscriptionSettings, Notification
 from .tasks import notify_superuser_new_registration, notify_user_new_submission
 import uuid
@@ -93,6 +94,7 @@ def user_logout(request):
     return redirect('home')
 
 
+@csrf_protect
 def public_form(request, form_id):
     user_profile = get_object_or_404(UserProfile, unique_form_id=form_id)
     
@@ -114,26 +116,37 @@ def public_form(request, form_id):
     else:
         form = PublicFormSubmissionForm()
     
+    context = {
+        'form': form,
+        'display_price': user_profile.display_price,
+        'display_currency': user_profile.display_currency,
+        'csrf_token': mark_safe(request.COOKIES.get('csrftoken') or ''),  # Ensure CSRF token is included safely
+    }
+    
     if user_profile.form_template:
-        custom_template = Template(user_profile.form_template.html_content)
-        context = Context({'form': form})
-        html_content = custom_template.render(context)
-        
-        response = HttpResponse(html_content)
-        response['Content-Type'] = 'text/html'
-        
-        # Inject custom CSS
-        css_content = f"<style>{user_profile.form_template.css_content}</style>"
-        response.content = response.content.decode('utf-8').replace('</head>', f'{css_content}</head>')
-        
-        return response
+        try:
+            # Render the custom template with context
+            custom_template = Template(user_profile.form_template.html_content)
+            custom_context = Context(context)
+            html_content = custom_template.render(custom_context)
+            
+            response = HttpResponse(html_content)
+            response['Content-Type'] = 'text/html'
+            
+            # Inject custom CSS into the rendered content
+            css_content = f"<style>{user_profile.form_template.css_content}</style>"
+            response.content = response.content.decode('utf-8').replace('</head>', f'{css_content}</head>')
+            
+            return response
+        except Exception as e:
+            # Log the error and fall back to the default template
+            print(f"Error rendering custom template: {str(e)}")
+            return render(request, 'public_form.html', context)
     else:
-        return render(request, 'public_form.html', {'form': form})
-
-
+        return render(request, 'public_form.html', context)
+    
 
 def form_success(request):
-    # Get the form URL from the query string
     form_url = request.GET.get('form_url')
     
     if not form_url:
@@ -146,37 +159,46 @@ def form_success(request):
 @login_required
 def dashboard(request):
     user_profile = request.user.userprofile
-    
+
     if request.method == 'POST':
-        form = TemplateSelectionForm(request.POST, instance=user_profile)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Form template updated successfully.")
-            return redirect('dashboard')
+        if 'update_template' in request.POST:
+            template_form = TemplateSelectionForm(request.POST, instance=user_profile)
+            price_currency_form = PriceAndCurrencyForm(instance=user_profile)
+            if template_form.is_valid():
+                template_form.save()
+                messages.success(request, "Form template updated successfully.")
+        elif 'update_price_currency' in request.POST:
+            template_form = TemplateSelectionForm(instance=user_profile)
+            price_currency_form = PriceAndCurrencyForm(request.POST, instance=user_profile)
+            if price_currency_form.is_valid():
+                price_currency_form.save()
+                messages.success(request, "Price and currency updated successfully.")
+        return redirect('dashboard')
     else:
-        form = TemplateSelectionForm(instance=user_profile)
-    
+        template_form = TemplateSelectionForm(instance=user_profile)
+        price_currency_form = PriceAndCurrencyForm(instance=user_profile)
+
     templates = CustomFormTemplate.objects.all()
-    
     form_url = request.build_absolute_uri(f'/form/{user_profile.unique_form_id}/')
-    
+
     # Get form submissions
     submissions = user_profile.form_submissions.all().order_by('-created_at')
-    
+
     # Setup pagination
     paginator = Paginator(submissions, 5)  
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
+
     # Get form submission analytics
     total_submissions = submissions.count()
     submissions_by_date = user_profile.form_submissions.values('created_at__date').annotate(count=Count('id')).order_by('-created_at__date')[:7]
-    
+
     # Get unread notifications
     unread_notifications = request.user.notifications.filter(is_read=False)
-    
+
     context = {
-        'form': form,
+        'template_form': template_form,
+        'price_currency_form': price_currency_form,
         'templates': templates,
         'form_url': form_url,
         'has_active_subscription': user_profile.has_active_subscription(),

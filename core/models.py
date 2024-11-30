@@ -27,6 +27,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     unique_form_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     form_template = models.ForeignKey(CustomFormTemplate, on_delete=models.SET_NULL, null=True, blank=True)
+    display_price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    display_currency = models.CharField(max_length=3, default='USD')
     subscription_start_date = models.DateField(null=True, blank=True)
     subscription_expiry_date = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=False)

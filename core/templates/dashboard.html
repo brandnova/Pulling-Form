@@ -88,12 +88,10 @@
     </div>
 </div>
 
-
-<!-- Template Selection Section -->
 <div class="container mx-auto px-4 py-6 space-y-6">
     <!-- Unified Card -->
     <div class="bg-white rounded-xl shadow-lg">
-        <!-- Form Section -->
+        <!-- Template Selection Form Section -->
         <div class="p-6 border-b border-gray-200">
             <h3 class="text-xl font-bold text-gray-800 flex items-center">
                 <i class="fas fa-file-alt text-blue-600 mr-3"></i>
@@ -104,14 +102,41 @@
             <form method="post" class="space-y-6">
                 {% csrf_token %}
                 <div>
-                    <label for="{{ form.form_template.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="{{ template_form.form_template.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                         Select Template
                     </label>
-                    {{ form.form_template }}
+                    {{ template_form.form_template }}
                 </div>
-                <button type="submit" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
-                    <i class="fas fa-plus mr-2"></i>
+                <button type="submit" name="update_template" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
+                    <i class="fas fa-save mr-2"></i>
                     Update Template
+                </button>
+            </form>
+        </div>
+
+        <!-- Price and Currency Form Section -->
+        <div class="border-t border-gray-200 p-6">
+            <h3 class="text-xl font-bold text-gray-800 flex items-center mb-4">
+                <i class="fas fa-money-bill-wave text-blue-600 mr-3"></i>
+                Update Price and Currency
+            </h3>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="{{ price_currency_form.display_price.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Display Price
+                    </label>
+                    {{ price_currency_form.display_price }}
+                </div>
+                <div>
+                    <label for="{{ price_currency_form.display_currency.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        Display Currency
+                    </label>
+                    {{ price_currency_form.display_currency }}
+                </div>
+                <button type="submit" name="update_price_currency" class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-300">
+                    <i class="fas fa-save mr-2"></i>
+                    Update Price and Currency
                 </button>
             </form>
         </div>
@@ -135,7 +160,7 @@
             </div>
         </div>
     </div>
-</div>
+
 
 <!-- Template Preview Modal -->
 <div id="templatePreviewModal" class="fixed inset-0 z-50 overflow-y-auto hidden">
