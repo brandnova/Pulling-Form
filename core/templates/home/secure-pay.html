@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurePay - Fast & Secure Payments</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating-icon {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto px-4 py-16 max-w-4xl">
+        <div class="bg-white shadow-2xl rounded-2xl overflow-hidden flex flex-col md:flex-row items-center relative animate__animated animate__fadeIn">
+            <!-- Decorative background elements -->
+            <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+                <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-blue-200 rounded-full transform rotate-45"></div>
+                <div class="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-green-100 rounded-full transform -rotate-45"></div>
+            </div>
+    
+            <div class="w-full md:w-1/2 p-8 text-center md:text-left relative z-10">
+                <h1 class="text-3xl md:text-4xl font-bold text-blue-900 mb-4 animate__animated animate__slideInLeft">
+                    <i class="fas fa-shield-alt text-green-500 mr-3"></i>SecurePay
+                </h1>
+                <p class="text-lg text-gray-700 mb-6 animate__animated animate__slideInLeft animate__delay-1s">
+                    Experience lightning-fast, bank-grade secure payments that protect your financial transactions.
+                </p>
+                
+                <div class="grid grid-cols-3 gap-4 mb-8">
+                    <div class="text-center transform transition duration-300 rounded-lg p-2 animate__animated animate__zoomIn animate__delay-2s">
+                        <i class="fas fa-rocket text-4xl text-blue-600 mb-2"></i>
+                        <p class="text-sm text-gray-600">Instant</p>
+                    </div>
+                    <div class="text-center transform transition duration-300 rounded-lg p-2 animate__animated animate__zoomIn animate__delay-2s">
+                        <i class="fas fa-lock text-4xl text-green-600 mb-2"></i>
+                        <p class="text-sm text-gray-600">Secure</p>
+                    </div>
+                    <div class="text-center transform transition duration-300 rounded-lg p-2 animate__animated animate__zoomIn animate__delay-2s">
+                        <i class="fas fa-globe text-4xl text-indigo-600 mb-2"></i>
+                        <p class="text-sm text-gray-600">Global</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-1/2 bg-blue-100 p-8 hidden md:flex items-center justify-center relative">
+                <i class="fas fa-money-check-alt text-9xl text-blue-600 opacity-70 floating-icon animate__animated animate__pulse animate__infinite"></i>
+                
+                <!-- Subtle animated particles -->
+                <div id="particles-js" class="absolute top-0 left-0 w-full h-full opacity-20"></div>
+            </div>
+        </div>
+    
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                particlesJS('particles-js', {
+                    particles: {
+                        number: { value: 80, density: { enable: true, value_area: 800 } },
+                        color: { value: '#03ac28' },
+                        shape: { type: 'circle' },
+                        opacity: { value: 0.5, random: false },
+                        size: { value: 3, random: true },
+                        line_linked: { enable: true, distance: 150, color: '#03ac28', opacity: 0.8, width: 3 },
+                        move: { enable: true, speed: 6, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+                    },
+                    interactivity: { detect_on: 'canvas', events: { onhover: { enable: false }, onclick: { enable: false }, resize: true } },
+                    retina_detect: true
+                });
+            });
+        </script>
+        
+        <div class="text-center mt-8 text-gray-600 relative z-10">
+            <p class="text-sm">
+                <i class="fas fa-lock mr-2 text-green-600"></i>
+                256-bit SSL Encryption | PCI DSS Compliant
+            </p>
+            <p class="text-sm">&copy; {% now "Y" %} SecurePay Solutions. All Rights Reserved.</p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+</body>
+</html>

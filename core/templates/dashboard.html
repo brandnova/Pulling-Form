@@ -113,6 +113,22 @@
                 </button>
             </form>
         </div>
+        
+        <!-- Available Templates Section -->
+        <div class="border-t border-gray-200">
+            <div class="p-6">
+                <ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {% for template in templates %}
+                        <li class="bg-gray-50 rounded-lg p-4 flex items-center justify-between hover:bg-gray-100 transition-colors duration-300">
+                            <span class="text-gray-800 truncate">{{ template.name }}</span>
+                            <button onclick="previewTemplate('{{ template.id }}')" class="text-blue-600 hover:text-blue-700 ml-3 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
 
         <!-- Price and Currency Form Section -->
         <div class="border-t border-gray-200 p-6">
@@ -141,24 +157,6 @@
             </form>
         </div>
         
-        <!-- Available Templates Section -->
-        <div class="border-t border-gray-200">
-            <div class="p-6">
-                <h4 class="text-lg font-semibold text-gray-800">Available Templates</h4>
-            </div>
-            <div class="p-6">
-                <ul class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                    {% for template in templates %}
-                        <li class="bg-gray-50 rounded-lg p-4 flex items-center justify-between hover:bg-gray-100 transition-colors duration-300">
-                            <span class="text-gray-800 truncate">{{ template.name }}</span>
-                            <button onclick="previewTemplate('{{ template.id }}')" class="text-blue-600 hover:text-blue-700 ml-3 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
     </div>
 
 

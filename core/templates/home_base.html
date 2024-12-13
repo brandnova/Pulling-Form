@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecurePay - {% block title %}{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating-icon {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-blue-100 min-h-screen flex items-center justify-center overflow-hidden">
+
+    <main class="container mx-auto px-4 py-16 max-w-4xl relative">
+        {% if messages %}
+            <div class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+                {% for message in messages %}
+                    <div class="p-4 mb-2 {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% else %}bg-blue-500{% endif %} text-white rounded-lg shadow-lg animate__animated animate__bounceIn">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        
+        {% block content %}
+
+        {% endblock %}
+
+        <div class="text-center mt-8 text-gray-600 relative z-10">
+            <p class="text-sm">
+                <i class="fas fa-lock mr-2 text-green-600"></i>
+                256-bit SSL Encryption | PCI DSS Compliant
+            </p>
+            <p class="text-sm">&copy; {% now "Y" %} SecurePay Solutions. All Rights Reserved.</p>
+        </div>
+    </main>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+</body>
+</html>

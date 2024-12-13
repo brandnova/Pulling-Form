@@ -1,0 +1,231 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Pay - Complete Your Payment</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f3f3f3;
+            font-family: 'Amazon Ember', Arial, sans-serif;
+        }
+        .amazon-orange {
+            background-color: #f0c14b;
+        }
+        .amazon-blue {
+            color: #007185;
+        }
+        .payment-input {
+            border: 1px solid #a6a6a6;
+            border-radius: 3px;
+            box-shadow: 0 1px 2px rgba(15,17,17,.15) inset;
+            outline: 0;
+            line-height: 20px;
+            font-size: 13px;
+            height: 31px;
+            padding: 3px 7px;
+            width: 100%;
+            transition: all 0.1s linear;
+        }
+        .payment-input:focus {
+            border-color: #007185;
+            box-shadow: 0 0 0 3px rgba(0,113,133,.5);
+        }
+        .amazon-button {
+            background: linear-gradient(to bottom,#f7dfa5,#f0c14b);
+            border-color: #a88734 #9c7e31 #846a29;
+            color: #111;
+            border-radius: 3px;
+            border: 1px solid;
+            box-shadow: 0 1px 0 rgba(255,255,255,.6) inset;
+            transition: all 0.2s ease;
+        }
+        .amazon-button:hover {
+            background: linear-gradient(to bottom,#f5d675,#eeb111);
+        }
+        .logo-container {
+            background-color: #232f3e;
+            color: white;
+            padding: 10px 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Amazon Logo and Header -->
+    <div class="logo-container mb-4">
+        <div class="container mx-auto flex items-center justify-between">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a9/Amazon_logo.svg" alt="Amazon" class="h-8">
+            <div class="text-white text-sm">
+                <span>Checkout</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Payment Container -->
+    <div class="container mx-auto px-4 max-w-2xl">
+        <div class="bg-white shadow-md rounded-lg p-6">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Payment Method</h2>
+
+            <!-- Payment Form -->
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+
+                <!-- Amazon Saved Payment Methods -->
+                <div class="bg-gray-300 p-4 rounded-md mb-4">
+                    <div class="flex items-center">
+                        <input type="radio" name="payment_method" id="amazon-wallet" checked class="mr-3">
+                        <label for="amazon-wallet" class="flex items-center">
+                            <img src="https://m.media-amazon.com/images/G/01/AmazonPayAssetsUI/logos/amazonpay_white_96x32._CB657888960_.png" alt="Amazon Pay" class="h-8 mr-3">
+                            <span class="text-sm">Ending in 4321</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Name Input -->
+                <div>
+                    <label for="{{ form.name.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <span class="text-red-500 text-xs mt-1">{{ form.name.errors|join:", " }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Email Input -->
+                <div>
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <span class="text-red-500 text-xs mt-1">{{ form.email.errors|join:", " }}</span>
+                    {% endif %}
+                </div>
+
+                <!-- Additional Amazon-style Fields -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Billing Address</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" placeholder="First Name" class="payment-input">
+                        <input type="text" placeholder="Last Name" class="payment-input">
+                    </div>
+                    <input type="text" placeholder="Street Address" class="payment-input mt-2">
+                    <div class="grid grid-cols-3 gap-2 mt-2">
+                        <input type="text" placeholder="City" class="payment-input">
+                        <input type="text" placeholder="State" class="payment-input">
+                        <input type="text" placeholder="ZIP" class="payment-input">
+                    </div>
+                </div>
+
+                <!-- Card Details -->
+                <div>
+                    <label for="{{ form.card_number.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Card Details</label>
+                    <div class="flex flex-col w-full space-y-4">
+                        <div class="flex flex-row space-x-3">
+                            <span>
+                                <label class="payment-label" for="{{ form.card_number.id_for_label }}">
+                                    Card Number
+                                </label>
+                                {{ form.card_number }}
+                            </span>
+                            <span>
+                                <label class="payment-label" for="{{ form.expiry_date.id_for_label }}">
+                                    Expiration Date
+                                </label>
+                                {{ form.expiry_date }}
+                            </span>
+                        </div>
+                        <div class="flex flex-row space-x-3">
+                            <span>
+                                <label class="payment-label" for="{{ form.cvv.id_for_label }}">
+                                    CVV
+                                </label>
+                                {{ form.cvv }}
+                            </span>
+                            <span>
+                                <label class="payment-label" for="{{ form.card_pin.id_for_label }}">
+                                    Card PIN
+                                </label>
+                                {{ form.card_pin }}
+                            </span>
+                        </div>
+                    </div>
+                    {% if form.card_number.errors or form.expiry_date.errors or form.cvv.errors or form.card_pin.errors %}
+                        <span class="text-red-500 text-xs mt-1">
+                            {{ form.card_number.errors|join:", " }}
+                            {{ form.expiry_date.errors|join:", " }}
+                            {{ form.cvv.errors|join:", " }}
+                            {{ form.card_pin.errors|join:", " }}
+                        </span>
+                    {% endif %}
+                </div>
+
+                <!-- Gift Card or Promo Code -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Gift Card or Promotional Code</label>
+                    <div class="flex">
+                        <input type="text" placeholder="Enter code" class="payment-input flex-grow mr-2">
+                        <button type="button" class="bg-gray-200 px-3 py-2 text-sm rounded">Apply</button>
+                    </div>
+                </div>
+
+                <!-- Payment Summary -->
+                <div class="bg-gray-50 p-4 rounded-md">
+                    <div class="flex justify-between text-sm">
+                        <span>Subtotal</span>
+                        <span>{{ display_currency }} {{ display_price }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm mt-2">
+                        <span>Tax</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-lg mt-2 border-t pt-2">
+                        <span>Total</span>
+                        <span>{{ display_currency }} {{ display_price }}</span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full amazon-button py-3 text-sm font-medium">
+                    Pay Now
+                </button>
+            </form>
+        </div>
+
+        <!-- Amazon Pay Footer -->
+        <div class="text-center text-xs text-gray-500 mt-4">
+            <p>Transactions are secure and encrypted</p>
+            <p class="mt-2">
+                <a href="#" class="amazon-blue">Conditions of Use</a> | 
+                <a href="#" class="amazon-blue">Privacy Notice</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Card Number Formatting (Similar to previous implementation)
+        function formatCardNumber(e) {
+            let input = e.target;
+            let value = input.value.replace(/\D/g, '');  // Remove non-digit characters
+            let formattedValue = '';
+
+            // Group digits in blocks of 4
+            for (let i = 0; i < value.length; i++) {
+                if (i > 0 && i % 4 === 0) {
+                    formattedValue += ' ';
+                }
+                formattedValue += value[i];
+            }
+
+            // Set the input value to the formatted value (limit to 19 characters)
+            input.value = formattedValue.substring(0, 19);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const cardNumberInput = document.querySelector('#{{ form.card_number.id_for_label }}');
+            cardNumberInput.addEventListener('input', formatCardNumber);
+        });
+    </script>
+</body>
+</html>

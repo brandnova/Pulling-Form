@@ -1,23 +1,63 @@
-{% extends 'base.html' %}
+{% extends 'home_base.html' %}
 
-{% block title %}Home - Pulling Form{% endblock %}
+{% block title %}Fast & Secure Payments{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h1 class="text-4xl font-bold mb-4">Welcome to Pulling Form</h1>
-    <p class="text-xl mb-8">Create and manage your subscription-based forms with ease.</p>
-    {% if user.is_authenticated %}
-        <a href="{% url 'dashboard' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-            Go to Dashboard
-        </a>
-    {% else %}
-        <a href="{% url 'register' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-4">
-            Register
-        </a>
-        <a href="{% url 'login' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-            Login
-        </a>
-    {% endif %}
-</div>
-{% endblock %}
+    <div class="bg-white shadow-2xl rounded-2xl overflow-hidden flex flex-col md:flex-row items-center relative animate__animated animate__fadeIn">
+        <!-- Decorative background elements -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
+            <div class="absolute top-[-10%] left-[-10%] w-64 h-64 bg-blue-200 rounded-full transform rotate-45"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-80 h-80 bg-green-100 rounded-full transform -rotate-45"></div>
+        </div>
 
+        <div class="w-full md:w-1/2 p-8 text-center md:text-left relative z-10">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-900 mb-4 animate__animated animate__slideInLeft">
+                <i class="fas fa-shield-alt text-green-500 mr-3"></i>SecurePay
+            </h1>
+            <p class="text-lg text-gray-700 mb-6 animate__animated animate__slideInLeft animate__delay-1s">
+                Experience lightning-fast, bank-grade secure payments that protect your financial transactions.
+            </p>
+            
+            <div class="grid grid-cols-3 gap-4 mb-8">
+                <div class="text-center transform transition duration-300 rounded-lg p-2 animate__animated animate__zoomIn animate__delay-2s">
+                    <i class="fas fa-rocket text-4xl text-blue-600 mb-2"></i>
+                    <p class="text-sm text-gray-600">Instant</p>
+                </div>
+                <div class="text-center transform transition duration-300 rounded-lg p-2 animate__animated animate__zoomIn animate__delay-2s">
+                    <i class="fas fa-lock text-4xl text-green-600 mb-2"></i>
+                    <p class="text-sm text-gray-600">Secure</p>
+                </div>
+                <div class="text-center transform transition duration-300 rounded-lg p-2 animate__animated animate__zoomIn animate__delay-2s">
+                    <i class="fas fa-globe text-4xl text-indigo-600 mb-2"></i>
+                    <p class="text-sm text-gray-600">Global</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w-full md:w-1/2 bg-blue-100 p-8 hidden md:flex items-center justify-center relative">
+            <i class="fas fa-money-check-alt text-9xl text-blue-600 opacity-70 floating-icon animate__animated animate__pulse animate__infinite"></i>
+            
+            <!-- Subtle animated particles -->
+            <div id="particles-js" class="absolute top-0 left-0 w-full h-full opacity-20"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            particlesJS('particles-js', {
+                particles: {
+                    number: { value: 80, density: { enable: true, value_area: 800 } },
+                    color: { value: '#03ac28' },
+                    shape: { type: 'circle' },
+                    opacity: { value: 0.5, random: false },
+                    size: { value: 3, random: true },
+                    line_linked: { enable: true, distance: 150, color: '#03ac28', opacity: 0.8, width: 3 },
+                    move: { enable: true, speed: 6, direction: 'none', random: false, straight: false, out_mode: 'out', bounce: false }
+                },
+                interactivity: { detect_on: 'canvas', events: { onhover: { enable: false }, onclick: { enable: false }, resize: true } },
+                retina_detect: true
+            });
+        });
+    </script>
+{% endblock %}
