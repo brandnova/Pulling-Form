@@ -1,23 +1,137 @@
 {% extends 'base.html' %}
 
-{% block title %}Home - Pulling Form{% endblock %}
+{% block title %}Kumo Techs - Powerful Form Builder{% endblock %}
 
 {% block content %}
-<div class="text-center">
-    <h1 class="text-4xl font-bold mb-4">Welcome to Pulling Form</h1>
-    <p class="text-xl mb-8">Create and manage your subscription-based forms with ease.</p>
-    {% if user.is_authenticated %}
-        <a href="{% url 'dashboard' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-            Go to Dashboard
-        </a>
-    {% else %}
-        <a href="{% url 'register' %}" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mr-4">
-            Register
-        </a>
-        <a href="{% url 'login' %}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-            Login
-        </a>
-    {% endif %}
+<div class="hero-gradient rounded-lg text-white">
+    <div class="pattern-bg p-5 container mx-auto grid md:grid-cols-2 gap-12 items-center py-16">
+        <div class="p-5" data-aos="fade-right">
+            <h1 class="text-5xl font-bold mb-6 leading-tight">
+                Create Beautiful Forms <br>
+                <span class="text-yellow-300">Effortlessly</span>
+            </h1>
+            <p class="text-xl mb-8 leading-relaxed opacity-80">
+                Kumo Techs empowers you to build dynamic, customizable forms with unlimited flexibility. 
+                Collect, analyze, and manage data with unprecedented ease.
+            </p>
+            <div class="flex space-x-4">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="bg-white text-primary px-6 py-3 rounded-lg hover:bg-opacity-90 transition duration-300 shadow-lg flex items-center">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Go to Dashboard
+                    </a>
+                {% else %}
+                    <a href="{% url 'register' %}" class="bg-white text-primary px-6 py-3 rounded-lg hover:bg-opacity-90 transition duration-300 shadow-lg flex items-center">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Start Building
+                    </a>
+                    <a href="{% url 'login' %}" class="border border-white text-white px-6 py-3 rounded-lg hover:bg-white hover:text-primary transition duration-300">
+                        Login
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="hidden md:block" data-aos="fade-left">
+            <div class="bg-white rounded-xl shadow-2xl p-6">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" class="w-full floating-element">
+                    <rect x="50" y="50" width="300" height="200" rx="10" fill="#f4f6f9" />
+                    <rect x="70" y="80" width="260" height="20" rx="5" fill="#4a6cf7" />
+                    <rect x="70" y="120" width="260" height="10" rx="5" fill="#e0e4f2" />
+                    <rect x="70" y="140" width="180" height="10" rx="5" fill="#e0e4f2" />
+                    <rect x="70" y="180" width="260" height="10" rx="5" fill="#e0e4f2" />
+                    <rect x="70" y="200" width="220" height="10" rx="5" fill="#e0e4f2" />
+                </svg>
+            </div>
+        </div>
+    </div>
 </div>
-{% endblock %}
 
+<section class="container mx-auto py-16">
+    <div class="text-center mb-12" data-aos="fade-up">
+        <h2 class="text-3xl font-bold text-gray-900 mb-4">Why Choose Kumo Techs?</h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+            Revolutionize your data collection with our intuitive and powerful form-building platform.
+        </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-white p-8 rounded-xl shadow-lg text-center transform transition duration-300 hover:scale-105" data-aos="zoom-in" data-aos-delay="100">
+            <div class="bg-blue-500 bg-opacity-10 rounded-full p-4 inline-block mb-4">
+                <i class="fas fa-columns text-blue-500 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">Unlimited Fields</h3>
+            <p class="text-gray-600">Create forms with as many custom fields as you need.</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-lg text-center transform transition duration-300 hover:scale-105" data-aos="zoom-in" data-aos-delay="200">
+            <div class="bg-green-500 bg-opacity-10 rounded-full p-4 inline-block mb-4">
+                <i class="fas fa-share-alt text-green-500 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">Easy Sharing</h3>
+            <p class="text-gray-600">Generate unique public URLs for seamless form distribution.</p>
+        </div>
+        <div class="bg-white p-8 rounded-xl shadow-lg text-center transform transition duration-300 hover:scale-105" data-aos="zoom-in" data-aos-delay="300">
+            <div class="bg-purple-500 bg-opacity-10 rounded-full p-4 inline-block mb-4">
+                <i class="fas fa-chart-pie text-purple-500 text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">Advanced Analytics</h3>
+            <p class="text-gray-600">Deep insights and comprehensive data visualization tools.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="bg-gray-50 py-16">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12" data-aos="fade-up">
+            <h2 class="text-3xl font-bold text-gray-900 mb-4">Powerful Features</h2>
+            <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+                Discover the comprehensive toolset that makes form creation and management a breeze.
+            </p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-xl shadow-md" data-aos="fade-right" data-aos-delay="100">
+                <div class="bg-indigo-500 text-white p-4 rounded-full inline-block mb-4">
+                    <i class="fas fa-puzzle-piece text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Drag & Drop Builder</h3>
+                <p class="text-gray-600">Intuitive interface to create forms without any coding knowledge.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md" data-aos="fade-right" data-aos-delay="200">
+                <div class="bg-green-500 text-white p-4 rounded-full inline-block mb-4">
+                    <i class="fas fa-mobile-alt text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Mobile Responsive</h3>
+                <p class="text-gray-600">Forms that look great on any device, from desktop to mobile.</p>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md" data-aos="fade-right" data-aos-delay="300">
+                <div class="bg-pink-500 text-white p-4 rounded-full inline-block mb-4">
+                    <i class="fas fa-lock text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold mb-3">Secure Data Collection</h3>
+                <p class="text-gray-600">Enterprise-grade security to protect your sensitive information.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Call to Action -->
+<section class="bg-primary text-white py-16">
+    <div class="container mx-auto px-4 text-center" data-aos="fade-up">
+        <h2 class="text-4xl font-bold mb-6">Ready to Transform Your Data Collection?</h2>
+        <p class="text-xl mb-8 max-w-2xl mx-auto opacity-80">
+            Join thousands of businesses and researchers who have simplified their form creation process.
+        </p>
+        <div class="flex justify-center space-x-4">
+            <a href="{% url 'register' %}" class="bg-white text-primary px-8 py-4 rounded-lg hover:bg-opacity-90 transition duration-300 shadow-lg flex items-center">
+                <i class="fas fa-rocket mr-2"></i>
+                Start Building
+            </a>
+            <a href="#" class="border border-white text-white px-8 py-4 rounded-lg hover:bg-white hover:text-primary transition duration-300">
+                Watch Demo
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,40 +1,168 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Pulling Form{% endblock %}</title>
+    <title>{% block title %}Kumo Techs - Powerful Form Builder{% endblock %}</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Custom styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6f9;
+            overflow-x: hidden;
+        }
+        .bg-primary {
+            background: linear-gradient(135deg, #4a6cf7 0%, #3158e2 100%);
+        }
+        .text-primary {
+            color: #4a6cf7;
+        }
+        .nav-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .pattern-bg {
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)), 
+                repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(0,0,0,0.02) 20px, rgba(0,0,0,0.02) 40px);
+        }
+        .hero-gradient {
+            background: linear-gradient(to right, #4a6cf7, #7b68ee);
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .floating-element {
+            animation: float 4s ease-in-out infinite;
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
-    <nav class="bg-blue-600 p-4 text-white">
-        <div class="container mx-auto flex justify-between items-center">
-            <a href="{% url 'home' %}" class="text-2xl font-bold">Pulling Form</a>
-            <div>
+<body class="antialiased text-gray-900">
+    <header class="bg-white sticky top-0 z-50 nav-shadow">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="{% url 'home' %}" class="flex items-center space-x-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                </svg>
+                <span class="text-xl font-bold text-primary">Kumo Techs</span>
+            </a>
+            
+            <nav class="hidden md:flex space-x-6">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'dashboard' %}" class="mr-4">Dashboard</a>
-                    <a href="{% url 'logout' %}">Logout</a>
+                    <a href="{% url 'dashboard' %}" class="text-gray-600 hover:text-primary transition duration-300 flex items-center">
+                        <i class="fas fa-chart-pie mr-2"></i>Dashboard
+                    </a>
+                    <a href="{% url 'logout' %}" class="text-gray-600 hover:text-primary transition duration-300 flex items-center">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
                 {% else %}
-                    <a href="{% url 'login' %}" class="mr-4">Login</a>
-                    <a href="{% url 'register' %}">Register</a>
+                    <a href="{% url 'login' %}" class="text-gray-600 hover:text-primary pt-2 transition duration-300">Login</a>
+                    <a href="{% url 'register' %}" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition duration-300 shadow-md">
+                        Get Started
+                    </a>
                 {% endif %}
+            </nav>
+            
+            <!-- Mobile Menu Toggle -->
+            <div class="md:hidden">
+                <button class="text-gray-600 hover:text-primary focus:outline-none" id="mobile-menu-toggle">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
             </div>
         </div>
-    </nav>
-    <main class="container mx-auto mt-8 p-4">
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
         {% if messages %}
-            <div class="mb-4">
+            <div class="mb-6 space-y-3">
                 {% for message in messages %}
-                    <div class="p-4 mb-2 {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %} rounded">
+                    <div class="p-4 rounded-lg shadow-md 
+                        {% if message.tags == 'success' %}bg-green-100 text-green-800{% elif message.tags == 'error' %}bg-red-100 text-red-800{% else %}bg-blue-100 text-blue-800{% endif %}">
                         {{ message }}
                     </div>
                 {% endfor %}
             </div>
         {% endif %}
+
         {% block content %}
         {% endblock %}
     </main>
+
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 grid md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-lg font-semibold mb-4">Kumo Techs</h3>
+                <p class="text-gray-400">Powerful form creation and data collection platform.</p>
+            </div>
+            <div>
+                <h4 class="text-md font-semibold mb-4">Quick Links</h4>
+                <nav class="space-y-2">
+                    <a href="{% url 'home' %}" class="text-gray-400 hover:text-white">Home</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'dashboard' %}" class="block text-gray-400 hover:text-white">Dashboard</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="block text-gray-400 hover:text-white">Login</a>
+                        <a href="{% url 'register' %}" class="block text-gray-400 hover:text-white">Register</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+        <div class="text-center mt-8 text-gray-500 text-sm">
+            &copy; {% now "Y" %} Kumo Techs. All Rights Reserved.
+        </div>
+    </footer>
+
+    <!-- AOS Animation Library -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+    <script>
+        // Initialize AOS
+        AOS.init();
+
+        // Mobile Menu Toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const mobileMenuContainer = document.createElement('div');
+
+        mobileMenuToggle.addEventListener('click', function() {
+            mobileMenuContainer.innerHTML = `
+                <div class="fixed inset-0 bg-black bg-opacity-50 z-40" id="mobile-menu-overlay">
+                    <div class="fixed top-0 right-0 w-64 h-full bg-white shadow-lg p-6 animate__animated animate__slideInRight">
+                        <button class="absolute top-4 right-4 text-gray-600 hover:text-primary" id="close-mobile-menu">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                        <nav class="space-y-4 mt-12">
+                            {% if user.is_authenticated %}
+                                <a href="{% url 'dashboard' %}" class="block text-gray-700 hover:text-primary">Dashboard</a>
+                                <a href="{% url 'logout' %}" class="block text-gray-700 hover:text-primary">Logout</a>
+                            {% else %}
+                                <a href="{% url 'login' %}" class="block text-gray-700 hover:text-primary">Login</a>
+                                <a href="{% url 'register' %}" class="block bg-primary text-white px-4 py-2 rounded-lg text-center">Get Started</a>
+                            {% endif %}
+                        </nav>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(mobileMenuContainer);
+
+            document.getElementById('close-mobile-menu').addEventListener('click', function() {
+                document.body.removeChild(document.getElementById('mobile-menu-overlay'));
+            });
+        });
+    </script>
 </body>
 </html>
-

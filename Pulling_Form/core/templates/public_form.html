@@ -4,23 +4,28 @@
 {% block title %}{{ custom_page.name }} - Pulling Form{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto bg-white p-8 rounded shadow-md">
-    <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">{{ custom_page.name }}</h2>
-    <p class="mb-8 text-gray-600 text-center">{{ custom_page.description }}</p>
+<div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg p-10 border-t-4 border-blue-500">
+    <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-3 text-gray-800">{{ custom_page.name }}</h2>
+        <p class="text-gray-600 max-w-xl mx-auto">{{ custom_page.description }}</p>
+    </div>
+
     <form method="post" class="space-y-6">
         {% csrf_token %}
         {% for field in form %}
-            <div class="space-y-2">
-                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">
+            <div class="mb-4">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
                     {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
                 </label>
+                
                 {% if field.help_text %}
-                    <p class="mt-1 text-sm text-gray-500">{{ field.help_text }}</p>
+                    <p class="text-xs text-gray-500 mb-1">{{ field.help_text }}</p>
                 {% endif %}
+
                 <div class="mt-1">
                     {% if field.field.widget.input_type == 'range' %}
                         <div class="flex items-center space-x-4">
-                            {{ field }}
+                            {{ field|add_class:"w-full h-2 bg-blue-100 rounded-lg appearance-none cursor-pointer" }}
                             <output class="text-sm text-gray-600">{{ field.value|default:field.field.min_value }}</output>
                         </div>
                     {% elif field.field.widget.input_type == 'checkbox' %}
@@ -46,17 +51,19 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        {{ field }}
+                        {{ field|add_class:"block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" }}
                     {% endif %}
                 </div>
+
                 {% if field.errors %}
-                    <span class="text-red-500 text-xs">{{ field.errors|join:", " }}</span>
+                    <p class="mt-1 text-sm text-red-600">{{ field.errors|join:", " }}</p>
                 {% endif %}
             </div>
         {% endfor %}
-        <div>
-            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded transition duration-200">
-                Submit
+
+        <div class="mt-6">
+            <button type="submit" class="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:-translate-y-1">
+                Submit Form
             </button>
         </div>
     </form>
